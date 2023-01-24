@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Template</title>
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid white;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        background-color: #96d4d4;
+        padding: 10px;
+      }
+      th{
+        background-color: black;
+        color: aliceblue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Add Template</h1>
+    <form action="addtemplate" method="post">
+        {%csrf_token %}
+      <label for="name">Name: <input type="text" name="name" /></label><br>
+      <label for="name">Template:</label><br>
+      <textarea
+        name="template"
+        cols="30"
+        rows="10"
+        placeholder="Add the message template"
+      >
+      </textarea><br>
+      <button type="submit">Add Template</button>
+    </form>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Message</th>
+      </tr>
+      {% for template in templates %}
+      <tr>
+        <td>{{template.name}}</td>
+        <td>{{template.message}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    
+    
+
+
+  </body>
+</html>
