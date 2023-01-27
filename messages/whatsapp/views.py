@@ -4,7 +4,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 import requests
 import random
-from messages.settings import WHATSAPP_TOKEN, VERIFY_TOKEN
+from keys import WHATSAPP_TOKEN, VERIFY_TOKEN
 from .models import MessageTemplate
 
 # Create your views here.

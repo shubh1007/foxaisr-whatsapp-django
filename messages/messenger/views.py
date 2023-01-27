@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from messages.settings import VERIFY_TOKEN, MESSENGER_TOKEN
+from keys import VERIFY_TOKEN, MESSENGER_TOKEN
 import requests
 from django.views import generic
 
