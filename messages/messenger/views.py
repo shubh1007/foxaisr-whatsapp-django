@@ -22,7 +22,6 @@ class FacebookWebhookView(View):
             return HttpResponse('Error, invalid token', status_code=403)
         return HttpResponse(hub_challenge)
 
-
     def post(self, request, *args, **kwargs):
         incoming_message = json.loads(request.body.decode('utf-8'))
         for entry in incoming_message['entry']:
