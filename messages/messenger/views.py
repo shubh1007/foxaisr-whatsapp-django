@@ -1,36 +1,75 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from keys import VERIFY_TOKEN, MESSENGER_TOKEN
 import requests
-from django.views import generic
+from django.views.generic import View
+from django.utils.decorators import method_decorator
+import json
 
-# Create your views here.
-class MessengerClass(generic.View):
+FB_ENDPOINT = 'https://graph.facebook.com/v15.0/'
+
+class FacebookWebhookView(View):
+    @method_decorator(csrf_exempt) # required
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs) #python3.6+ syntax
+
     def get(self, request, *args, **kwargs):
-        return HttpResponse("Hello World!")
+        hub_mode   = request.GET.get('hub.mode')
+        hub_token = request.GET.get('hub.verify_token')
+        hub_challenge = request.GET.get('hub.challenge')
+        if hub_token != VERIFY_TOKEN:
+            return HttpResponse('Error, invalid token', status_code=403)
+        return HttpResponse(hub_challenge)
+
+    def post(self, request, *args, **kwargs):
+        incoming_message = json.loads(request.body.decode('utf-8'))
+        for entry in incoming_message['entry']:
+            for message in entry['messaging']:
+                if 'message' in message:
+                    fb_user_id = message['sender']['id'] # sweet!
+                    fb_user_txt = message['message'].get('text')
+                    if fb_user_txt:
+                        sendMessage(fb_user_id, fb_user_txt)
+                    print(f"USER ID: {fb_user_id}\nTEXT: {fb_user_txt}")
+        return HttpResponse("Success", status=200)
+
+def sendMessage(fbid, recevied_message):
+    # print(recevied_message)
+    msg = recevied_message
+    if msg is not None:                 
+        endpoint = f"{FB_ENDPOINT}/me/messages?access_token={MESSENGER_TOKEN}"
+        response_msg = json.dumps({"recipient":{"id":fbid}, "message":{"text":msg}})
+        status = requests.post(
+            endpoint, 
+            headers={"Content-Type": "application/json"},
+            data=response_msg)
+        print(status.json())
+        return status.json()
+    return None
+
 
 # Create your views here.
-@csrf_exempt
-def index(request):
-    if request.method == "GET":
-        print("GETTTT")
-        mode = request.GET['hub.mode']
-        token = request.GET['hub.verify_token']
-        challenge = request.GET['hub.challenge']
-        if mode == 'subscribe' and token == VERIFY_TOKEN:
-            return HttpResponse(challenge, status = 200)
-        else:
-            return HttpResponse('error', status = 403)
-    if request.method == "POST":
-        print("POST MESSAGE")
-        print(request)
-        return HttpResponse("success", status = 200)
+# @csrf_exempt
+# def index(request):
+#     if request.method == "GET":
+#         print("GETTTT")
+#         mode = request.GET['hub.mode']
+#         token = request.GET['hub.verify_token']
+#         challenge = request.GET['hub.challenge']
+#         if mode == 'subscribe' and token == VERIFY_TOKEN:
+#             return HttpResponse(challenge, status = 200)
+#         else:
+#             return HttpResponse('error', status = 403)
+#     if request.method == "POST":
+#         print("POST MESSAGE")
+#         print(request)
+#         return HttpResponse("success", status = 200)
 
-def sendMessengerMessage(request):
-    response = requests.post(
-        f"https://graph.facebook.com/LATEST-API-VERSION/PAGE-ID/messages?recipient={'id':'PSID'}&messaging_type=RESPONSE&message={'text':'hello,world'}&access_token={MESSENGER_TOKEN}")
-    print(response)
+# def sendMessengerMessage(request):
+#     response = requests.post(
+#         f"https://graph.facebook.com/LATEST-API-VERSION/PAGE-ID/messages?recipient={'id':'PSID'}&messaging_type=RESPONSE&message={'text':'hello,world'}&access_token={MESSENGER_TOKEN}")
+#     print(response)
 
 # import json
 # import requests, random, re
