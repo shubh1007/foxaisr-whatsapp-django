@@ -77,7 +77,18 @@ def sendMessage(fbid, recevied_message):
             headers={"Content-Type": "application/json"},
             data=response_msg)
         # print(status.json())
-        print("Send Message Method")
+        # print("Send Message Method")
         return status.json()
     return None
+
+
+
+
+
+
+
+
+
+
+
 
